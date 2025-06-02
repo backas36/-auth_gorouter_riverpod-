@@ -1,0 +1,457 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Flutter 規範指南
+
+## 規範的注意事項
+
+在應用前述規範時，以下是一些需要特別注意的地方，特別考慮 Flutter 3.27.4 的版本特性、長期開發需求以及 AI 輔助場景：
+
+### Flutter 3.27.4 的版本特性
+
+- **穩定性**：Flutter 3.27.4 是穩定版本，支援最新的 Dart 3.x（確認為 Dart 3.6.x），因此支援空安全（null safety）、記錄型別（records）、模式比對（pattern matching）等新特性。規範中的範例應確保與這些特性相容。
+- **Widget 支援**：確保使用 Theme.of(context).textTheme.titleLarge 等現代 API，避免過時的 headline6 等屬性（規範已更新）。
+- **依賴相容性**：使用第三方套件（如 Riverpod、Freezed、Supabase）時，需確認版本與 Flutter 3.27.4 相容。例如：
+
+  ```
+  flutter_riverpod: ^2.5.1
+  freezed: ^2.5.7
+  supabase_flutter: ^2.8.0
+  ```
+
+  在 pubspec.yaml 中檢查依賴版本，並執行 flutter pub upgrade 確保最新相容版本。
+- **新功能**：Flutter 3.27.4 改進了 Impeller 渲染引擎（部分平台預設啟用），可能影響動畫性能。測試動畫時需驗證是否流暢。
+
+### 命名規範的挑戰
+
+- **一致性**：團隊中若有多人協作，命名規範（如 lowerCamelCase、snake_case）需嚴格執行，否則可能導致程式碼混亂。建議使用 dart format 和自定義 Lint 規則（如 analysis_options.yaml）強制執行。
+- **語義化**：命名需直觀且具描述性，避免過於抽象（如 data）或過於冗長（如 userProfileDataModelClass）。這需要與團隊達成共識。
+- **檔案與類別對應**：檔案名應與主要類別名一致（例如 user_model.dart 包含 UserModel 類），否則可能增加維護成本。
+
+### AI 輔助的限制
+
+- **程式碼生成品質**：AI 可能生成不符合規範的程式碼（如缺少 const 或錯誤的 Riverpod 結構）。需明確要求 AI 遵循規範，並手動檢查生成結果。
+- **上下文理解**：若 AI 未充分理解專案結構，可能生成不適配的程式碼。建議提供具體的檔案結構或範例，幫助 AI 生成更精確的程式碼。
+- **Lint 整合**：AI 生成的程式碼應與 dart format 和 flutter_lints 相容，減少後期修正成本。
+
+### 長期開發的維護性
+
+- **資料夾結構的擴展性**：規範中的 features/ 結構適合中大型專案，但小型專案可能覺得過於複雜。需根據專案規模調整，例如小型專案可簡化為單層結構。
+- **模組化過度**：過多的子資料夾（如 data/models/、data/repositories/）可能增加檔案切換成本。建議在模組化與簡潔間找到平衡。
+- **文件與註解**：規範要求為複雜邏輯撰寫註解，但過多註解可能降低可讀性。應聚焦於非顯而易見的邏輯，並使用清晰的程式碼結構減少註解需求。
+
+### 性能與錯誤處理
+
+- **AsyncValue 使用**：規範強調使用 AsyncValue 處理異步狀態，但若濫用，可能導致 UI 邏輯複雜。應確保每個狀態的 UI 呈現簡潔且一致。
+- **Supabase 錯誤處理**：規範建議為 Supabase 操作實現網路錯誤處理，但未涵蓋離線支援或緩存策略。長期專案可能需考慮這些場景。
+- **ListView 優化**：規範提到 ListView.builder，但未強調 Sliver 或 CustomScrollView 的進階用法。若專案涉及複雜滾動效果，需進一步優化。
+
+### UI/UX 與本地化
+
+- **繁體中文支援**：規範要求使用繁體中文說明，但未明確提到應用程式內的本地化（i18n）。若專案需支援多語言，應使用 intl 套件並在規範中補充。
+- **響應式設計**：規範提到 LayoutBuilder 和 MediaQuery，但未涵蓋平板或桌面應用場景。Flutter 3.27.4 支援多平台，需確保 UI 在不同設備上的一致性。
+
+### 工具與流程
+
+- **build_runner 性能**：規範要求使用 build_runner 生成程式碼，但頻繁執行可能影響開發效率。建議使用 --build-filter 限定生成範圍。
+
+  ```bash
+  flutter pub run build_runner build --build-filter="lib/features/auth/**"
+  ```
+
+- **Lint 規則衝突**：自定義 Lint 規則可能與 flutter_lints 衝突，需定期檢查 analysis_options.yaml 的設定。
+- **版本控制**：規範未提到 Git 提交規範或 CI/CD 整合。長期專案應搭配工具（如 Husky 或 GitHub Actions）確保程式碼品質。
+
+## 更新後的規範（整合命名方式）
+
+以下是更新後的規範，針對 Flutter 3.27.4 進行優化，明確加入命名方式，並解決上述注意事項。為簡潔起見，我僅列出關鍵變更部分，並確保與原規範的核心原則一致。
+
+### 核心原則
+
+- 提供簡潔、技術精確的 Dart 程式碼，符合 Flutter 3.27.4（Dart 3.6.x）的特性，如空安全、記錄型別和模式比對。
+- 確保模組化、可維護且與 AI 輔助工具（程式碼生成、Lint 檢查）相容。
+- 優先使用功能性與宣告式程式設計，偏好 Widget 組合而非繼承。
+- 使用具描述性且一致的命名，遵循明確的命名規範。
+
+### 命名規範
+
+#### 類別與型別
+
+- 使用 UpperCamelCase，具語義化且反映功能。
+
+  ```dart
+  class UserProfile // 好
+  class UP          // 避免
+  ```
+
+- 檔案名與主要類別一致，使用 snake_case。
+
+  ```dart
+  // 檔案: user_profile.dart
+  class UserProfile { ... }
+  ```
+
+#### 變數與函數
+
+- 使用 lowerCamelCase，加入輔助動詞（如 is、has）反映狀態。
+
+  ```dart
+  bool isLoading = false;
+  void fetchUserData() => ...;
+  ```
+
+- 避免縮寫，確保語義清晰。
+
+  ```dart
+  String userName // 好
+  String uName    // 避免
+  ```
+
+#### 常數
+
+- 使用 lowercase_with_underscores，集中於 constants/。
+
+  ```dart
+  const api_key = 'abc123';
+  ```
+
+#### 資料夾與檔案
+
+- 使用 snake_case，反映模組功能。
+
+  ```
+  features/authentication/login_page.dart
+  ```
+
+- Barrel 檔案命名為 index.dart，匯出相關內容。
+
+  ```dart
+  // features/auth/index.dart
+  export 'login_page.dart';
+  ```
+
+#### 列舉與狀態
+
+- 列舉使用 UpperCamelCase，值使用 lowerCamelCase。
+
+  ```dart
+  enum UserStatus {
+    active,
+    inactive,
+  }
+  ```
+
+### Dart/Flutter 規範
+
+- 使用 const 建構不可變 Widget，提升性能。
+
+  ```dart
+  const Text('歡迎');
+  ```
+
+- 使用 Freezed 生成不可變狀態類，支援模式比對（Dart 3.6.x）。
+
+  ```dart
+  @freezed
+  class AuthState with _$AuthState {
+    const factory AuthState.initial() = _Initial;
+    const factory AuthState.loading() = _Loading;
+    const factory AuthState.success(User user) = _Success;
+    const factory AuthState.failure(String error) = _Failure;
+  }
+  ```
+
+- 單行函數使用箭頭語法，保持簡潔。
+
+  ```dart
+  bool get isAuthenticated => _user != null;
+  ```
+
+- 確保型別安全，避免 dynamic，使用 late 時明確初始化。
+
+  ```dart
+  late final String _sessionId;
+  void init() => _sessionId = generateId();
+  ```
+
+### 錯誤處理與驗證
+
+- 使用 SelectableText.rich 顯示錯誤訊息，紅色高亮。
+
+  ```dart
+  SelectableText.rich(
+    TextSpan(text: '錯誤: $error', style: TextStyle(color: Colors.red)),
+  )
+  ```
+
+- 使用 AsyncValue 處理異步狀態，支援模式比對。
+
+  ```dart
+  switch (ref.watch(userProvider)) {
+    AsyncData(:final value): Text(value.name),
+    AsyncLoading(): CircularProgressIndicator(),
+    AsyncError(:final error): Text('錯誤: $error'),
+  }
+  ```
+
+- 為 Supabase 操作實現離線與網路錯誤處理。
+
+  ```dart
+  try {
+    final data = await supabase.from('users').select();
+  } on PostgrestException catch (e) {
+    if (e.code == 'network_error') {
+      throw NetworkException('無網路連線');
+    }
+    throw AppException('查詢失敗: ${e.message}');
+  }
+  ```
+
+### Riverpod 規範
+
+- 使用 @riverpod 生成 AsyncNotifierProvider 或 NotifierProvider。
+
+  ```dart
+  @riverpod
+  class ProfileNotifier extends AsyncNotifier<User> {
+    @override
+    Future<User> build() async => await apiService.fetchUser();
+  }
+  ```
+
+- 使用 ref.invalidate() 觸發更新，確保銷毀時取消異步操作。
+
+  ```dart
+  ref.onDispose(() => _stream?.cancel());
+  ```
+
+### 性能優化
+
+- 使用 const Widget 和 ListView.builder 減少重建。
+
+  ```dart
+  ListView.builder(
+    itemCount: items.length,
+    itemBuilder: (context, index) => ItemWidget(item: items[index]),
+  )
+  ```
+
+- 使用 cached_network_image 處理遠端圖片。
+
+  ```dart
+  CachedNetworkImage(
+    imageUrl: 'https://example.com/image.jpg',
+    placeholder: (context, url) => CircularProgressIndicator(),
+    errorWidget: (context, url, error) => Icon(Icons.error),
+  )
+  ```
+
+- 若使用 Impeller 引擎（Flutter 3.27.4 預設），測試動畫性能。
+
+  ```dart
+  AnimatedOpacity(
+    opacity: isVisible ? 1.0 : 0.0,
+    duration: Duration(milliseconds: 300),
+    child: Text('淡入效果'),
+  )
+  ```
+
+### 關鍵慣例
+
+#### 導航
+
+- 使用 GoRouter 支援深層連結。
+
+  ```dart
+  final router = GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => HomePage()),
+      GoRoute(path: '/login', builder: (_, __) => LoginPage()),
+    ],
+  );
+  ```
+
+#### 無狀態優先
+
+- 使用 ConsumerWidget 或 HookConsumerWidget。
+
+  ```dart
+  class HomePage extends HookConsumerWidget {
+    @override
+    Widget build(BuildContext context, WidgetRef ref) {
+      final counter = useState(0);
+      return Text('計數: ${counter.value}');
+    }
+  }
+  ```
+
+#### 本地化
+
+- 使用 intl 套件支援繁體中文等多語言。
+
+  ```dart
+  String welcomeMessage() => Intl.message(
+    '歡迎使用',
+    name: 'welcomeMessage',
+    locale: 'zh_TW',
+  );
+  ```
+
+### UI 與樣式
+
+- 使用 Theme.of(context).textTheme 確保一致性。
+
+  ```dart
+  Text('標題', style: Theme.of(context).textTheme.titleLarge);
+  ```
+
+- 使用 LayoutBuilder 實現響應式設計。
+
+  ```dart
+  LayoutBuilder(
+    builder: (context, constraints) => constraints.maxWidth > 600
+        ? DesktopLayout()
+        : MobileLayout(),
+  )
+  ```
+
+- 若涉及 /ui，提供視覺層次建議，包含動畫和引導。
+
+  ```dart
+  ElevatedButton(
+    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+    onPressed: () => submit(),
+    child: Text('確認', style: TextStyle(color: Colors.white)),
+  )
+  ```
+
+### 模型與資料庫
+
+- 資料表包含 created_at、updated_at、is_deleted。
+
+  ```sql
+  create table posts (
+    id uuid primary key,
+    content text,
+    created_at timestamp default now(),
+    updated_at timestamp default now(),
+    is_deleted boolean default false
+  );
+  ```
+
+- 使用 @JsonSerializable 和 @JsonKey。
+
+  ```dart
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  class Post {
+    final String content;
+    @JsonKey(includeFromJson: true, includeToJson: false)
+    final DateTime createdAt;
+    Post(this.content, this.createdAt);
+  }
+  ```
+
+### Widget 與元件
+
+- 創建小型私有 Widget。
+
+  ```dart
+  class _LoadingIndicator extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) => CircularProgressIndicator();
+  }
+  ```
+
+- 使用 RefreshIndicator 實現下拉刷新。
+
+  ```dart
+  RefreshIndicator(
+    onRefresh: () => ref.refresh(postsProvider.future),
+    child: ListView(...),
+  )
+  ```
+
+### 其他規範
+
+- 使用 log 記錄除錯資訊。
+
+  ```dart
+  import 'dart:developer';
+  log('載入資料: $data');
+  ```
+
+- 程式碼行長不超過 80 個字元，添加尾隨逗號。
+
+  ```dart
+  Widget buildButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) => ElevatedButton(...);
+  ```
+
+### 程式碼生成
+
+- 使用 build_runner 生成程式碼，限定範圍以提升效率。
+
+  ```bash
+  flutter pub run build_runner build --build-filter="lib/features/**"
+  ```
+
+### 文件撰寫
+
+- 為複雜邏輯添加 /// 註解，保持簡潔。
+
+  ```dart
+  /// 驗證電子郵件格式。
+  bool isValidEmail(String email) => RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  ```
+### 撰寫限制
+
+- 每個檔案都要盡可能低 300 行程式碼，如果超過 300行則需要將組件拆解達到最好的設計風格。
+
+### 資料夾結構
+
+```
+lib/
+├── core/
+│   ├── constants/
+│   │   └── app_constants.dart
+│   ├── enums/
+│   │   └── user_status.dart
+│   ├── extensions/
+│   │   └── string_extensions.dart
+│   └── errors/
+│       └── app_exception.dart
+├── features/
+│   ├── authentication/
+│   │   ├── data/
+│   │   │   ├── models/
+│   │   │   │   └── user_model.dart
+│   │   │   └── repositories/
+│   │   │       └── auth_repository.dart
+│   │   ├── presentation/
+│   │   │   │   └── login_page.dart
+│   │   │   └── widgets/
+│   │   │       └── auth_button.dart
+│   │   └── providers/
+│   │       └── auth_provider.dart
+│   ├── home/
+│   └── settings/
+├── services/
+│   └── api_service.dart
+├── theme/
+│   ├── app_theme.dart
+│   └── colors.dart
+├── utils/
+│   ├── logger.dart
+│   └── validators.dart
+├── routes/
+│   ├── app_routes.dart
+│   └── navigation.dart
+├── l10n/                    # 本地化檔案
+│   └── app_zh.arb
+├── app.dart
+└── main.dart``` 
