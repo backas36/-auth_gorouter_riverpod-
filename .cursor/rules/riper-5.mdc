@@ -3,11 +3,6 @@ description:
 globs: 
 alwaysApply: true
 ---
----
-description: 
-globs: 
-alwaysApply: false
----
 # RIPER-5 + 多維思考 + 代理執行協議
 
 ## 目錄
