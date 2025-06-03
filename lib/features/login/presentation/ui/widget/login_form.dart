@@ -43,12 +43,8 @@ class _LoginFormState extends State<LoginForm> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                // TODO: global decoration, border
                 decoration: InputDecoration(
                   labelText: 'Email'.hardcoded,
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(kSmall)),
-                  ),
                   prefixIcon: const Icon(Icons.email),
                 ),
                 validator: (value) {
@@ -67,9 +63,6 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: _obscureText,
                 decoration: InputDecoration(
                   labelText: 'Password'.hardcoded,
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(kSmall)),
-                  ),
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
                     onPressed: _toggleObscureText,
