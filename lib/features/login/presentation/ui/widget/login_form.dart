@@ -1,6 +1,7 @@
 import 'package:auth_gorouter_riverpod/common/extension/string_hardcoded.dart';
 import 'package:auth_gorouter_riverpod/common/style/app_dimensions.dart';
 import 'package:auth_gorouter_riverpod/common/validators/validators.dart';
+import 'package:auth_gorouter_riverpod/features/login/presentation/ui/widget/login_button.dart';
 import 'package:flutter/material.dart';
 
 class LoginForm extends StatefulWidget {
@@ -48,7 +49,7 @@ class _LoginFormState extends State<LoginForm> {
                   labelText: 'Email'.hardcoded,
                   prefixIcon: const Icon(Icons.email),
                 ),
-                validator: validateEmail,
+                validator: (value) => validateEmail(value),
               ),
               const SizedBox(height: kMedium),
               TextFormField(
@@ -64,28 +65,12 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                   ),
                 ),
-                validator: validatePassword,
+                validator: (value) => validatePassword(value),
               ),
               //const ForgotPassword(),
               const SizedBox(height: kLarge),
 
-              //TODO: LoginButton(onPressed: _login),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: kMedium),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(kSmall),
-                    ),
-                  ),
-                  onPressed: _onLoginPressed,
-                  label: Text(
-                    'login'.hardcoded,
-                    style: const TextStyle(fontSize: kMedium),
-                  ),
-                ),
-              ),
+              LoginButton(onPressed: _onLoginPressed),
 
               const SizedBox(height: kLarge),
               //const LoginWith(),

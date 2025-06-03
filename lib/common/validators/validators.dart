@@ -1,6 +1,6 @@
 import 'package:auth_gorouter_riverpod/common/extension/string_hardcoded.dart';
 
-String? validateEmail(String? value) {
+Function(String?) validateEmail = (String? value) {
   if (value == null || value.isEmpty) {
     return 'Email is required'.hardcoded;
   }
@@ -8,9 +8,9 @@ String? validateEmail(String? value) {
     return 'Invalid email address'.hardcoded;
   }
   return null;
-}
+};
 
-String? validatePassword(String? value) {
+Function(String?) validatePassword = (String? value) {
   if (value == null || value.isEmpty) {
     return 'Password is required'.hardcoded;
   }
@@ -18,4 +18,4 @@ String? validatePassword(String? value) {
     return 'Password must be at least 8 characters long'.hardcoded;
   }
   return null;
-}
+};
