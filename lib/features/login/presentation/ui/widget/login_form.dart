@@ -1,17 +1,21 @@
 import 'package:auth_gorouter_riverpod/common/extension/string_hardcoded.dart';
 import 'package:auth_gorouter_riverpod/common/style/app_dimensions.dart';
 import 'package:auth_gorouter_riverpod/common/validators/validators.dart';
+import 'package:auth_gorouter_riverpod/core/route/route_name.dart';
+import 'package:auth_gorouter_riverpod/features/login/presentation/controller/login_controller.dart';
 import 'package:auth_gorouter_riverpod/features/login/presentation/ui/widget/login_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginForm extends StatefulWidget {
+class LoginForm extends ConsumerStatefulWidget {
   const LoginForm({super.key});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _LoginFormState extends ConsumerState<LoginForm> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _emailController;
@@ -34,6 +38,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    _listener();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(kMedium),
@@ -83,6 +88,20 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
+  void _listener() {
+    debugPrint(' ==========listener==========');
+    //TODO: handle error
+
+    ref.listen(
+      loginControllerProvider.select((value) => value.isLoginSuccess),
+      (_, next) {
+        if (next) {
+          //context.goNamed(homeRoute);
+        }
+      },
+    );
+  }
+
   void _toggleObscureText() {
     setState(() {
       _obscureText = !_obscureText;
@@ -92,8 +111,12 @@ class _LoginFormState extends State<LoginForm> {
   void _onLoginPressed() {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
-      debugPrint('email: ${_emailController.text}');
-      debugPrint('password: ${_passwordController.text}');
+      final formData = {
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      };
+      ref.read(loginControllerProvider.notifier).setFormData(formData);
+      ref.read(loginControllerProvider.notifier).login();
     }
   }
 }
