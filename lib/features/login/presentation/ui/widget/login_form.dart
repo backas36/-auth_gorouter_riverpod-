@@ -1,5 +1,5 @@
 import 'package:auth_gorouter_riverpod/common/extension/string_hardcoded.dart';
-import 'package:auth_gorouter_riverpod/common/style/dimens.dart';
+import 'package:auth_gorouter_riverpod/common/style/app_dimensions.dart';
 import 'package:flutter/material.dart';
 
 class LoginForm extends StatefulWidget {
