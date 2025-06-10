@@ -45,3 +45,8 @@ app.*.map.json
 /android/app/release
 
 .env
+
+CLAUDE.md
+
+NOTES/
+ISSUE_TEMPLATE/
