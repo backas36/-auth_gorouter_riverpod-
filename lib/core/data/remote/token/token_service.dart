@@ -1,4 +1,6 @@
+import 'package:auth_gorouter_riverpod/common/dtos/base_response.dart';
 import 'package:auth_gorouter_riverpod/common/dtos/refresh_token_response.dart';
+import 'package:auth_gorouter_riverpod/common/dtos/token_data.dart';
 import 'package:auth_gorouter_riverpod/common/http_status/status_code.dart';
 import 'package:auth_gorouter_riverpod/core/data/local/isecure_storage.dart';
 import 'package:auth_gorouter_riverpod/core/data/local/secure_storage.dart';
@@ -7,9 +9,8 @@ import 'package:auth_gorouter_riverpod/core/data/remote/token/itoken_service.dar
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../endpoints.dart';
-
 // family Provider 允許你在取得 Provider 時傳入一個參數（這裡是 Dio）。
+
 final tokenServiceProvider = Provider.family<ITokenService, Dio>((ref, dio) {
   final secureStorage = ref.watch(secureStorageProvider);
   return TokenService(dio, secureStorage);
@@ -46,14 +47,17 @@ class TokenService implements ITokenService {
   }
 
   @override
-  Future<RefreshTokenResponse> refreshToken(String? refreshToken) async {
+  Future<TokenDataResponse> refreshToken(String? refreshToken) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      refreshTokenEndPoint,
+      '/api/v1/auth/refresh-token',
       data: {'refreshToken': refreshToken},
     );
 
     if (response.statusCode == success) {
-      return RefreshTokenResponse.fromJson(response.data ?? {});
+      return TokenDataResponse.fromJson(
+        response.data ?? {},
+        (json) => TokenData.fromJson(json as Map<String, dynamic>),
+      );
     } else {
       throw DioException(
         requestOptions: response.requestOptions,
